@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-14
+
 ### Added
 
 - Whisker account sign-in (e-mail and password, Amazon Cognito SRP like the
@@ -32,4 +34,5 @@ the notes of the version's GitHub Release.
 - Texts, feature names and documentation in English, French, German and
   Spanish.
 
-[Unreleased]: https://github.com/guim31/gladys-litter-robot/commits/main
+[Unreleased]: https://github.com/guim31/gladys-litter-robot/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-litter-robot/releases/tag/v1.0.1

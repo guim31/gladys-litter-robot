@@ -1,6 +1,6 @@
 {
   "name": "gladys-litter-robot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Whisker Litter-Robot 3 Connect, Litter-Robot 4 and Feeder-Robot integration for Gladys Assistant (not affiliated with Whisker).",
   "type": "module",
