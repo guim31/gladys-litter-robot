@@ -1,45 +1,50 @@
 // -----------------------------------------------------------------------------
-// Integration configuration.
-//
-// The configuration is filled in by the user in Gladys, from the `config_schema`
-// declared in `gladys-assistant-integration.json`. The SDK fetches it for you
-// (`gladys.getConfig()`) and notifies you of every change through
-// `gladys.onConfigUpdated()`.
-//
-// This module only provides defaults and normalizes the received object, so the
-// rest of the code never has to deal with `undefined`.
+// Integration configuration: defaults (they mirror the `default` values of the
+// manifest `config_schema`, see test/manifest.test.js) and normalization, so
+// the rest of the code never deals with strings, blanks or `undefined`.
 // -----------------------------------------------------------------------------
 
-// Defaults: they MUST stay consistent with the `default` values declared in the
-// `config_schema` of the manifest.
+export const LANGUAGES = ['en', 'fr', 'de', 'es'];
+
+// How often the robots are read again, in minutes: the safety net of the
+// real-time subscriptions, and the only source for a Litter-Robot 3.
+export const REFRESH_MINUTES = ['2', '5', '10', '15'];
+
+export const WEIGHT_UNITS = ['kg', 'lb'];
+
+// Portions Gladys may dispense per Feeder-Robot over 24 hours (scene action,
+// device button): a scene that loops cannot empty the hopper.
+export const SNACK_DAILY_LIMITS = ['1', '2', '3', '4', '6', '8'];
+
 export const DEFAULT_CONFIG = {
-  latitude: 48.8566, // Paris
-  longitude: 2.3522,
-  unit: 'celsius', // 'celsius' | 'fahrenheit'
-  // Seconds between two reads of the polled sensors. Gladys polls at most once
-  // a minute: slower intervals are applied by skipping polls (see
-  // createPoller in src/devices/index.js).
-  poll_frequency: 300,
-  // Reserved key (NOT in config_schema): because the manifest declares both
-  // 'local' and 'cloud' in its `transports` field, Gladys shows a standard
-  // "Prefer the local connection" toggle and sends the user's choice here.
-  // Read-only for the integration; defaults to true.
-  GLADYS_PREFER_LOCAL: true,
+  email: '',
+  password: '',
+  refresh_minutes: '5',
+  weight_unit: 'kg',
+  snack_daily_limit: '4',
+  language: 'fr',
 };
 
 /**
- * Merge the user config with the defaults.
- * @param {Record<string, unknown>} raw config returned by the SDK
+ * @param {Record<string, unknown>} raw the configuration returned by the SDK
  */
 export function normalizeConfig(raw = {}) {
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const pick = (key, list) => {
+    const value = source[key] === undefined || source[key] === null ? '' : String(source[key]);
+    return list.includes(value) ? value : DEFAULT_CONFIG[key];
+  };
   return {
-    ...DEFAULT_CONFIG,
-    ...raw,
-    // Force the types: config may arrive as strings from a form.
-    latitude: Number(raw.latitude ?? DEFAULT_CONFIG.latitude),
-    longitude: Number(raw.longitude ?? DEFAULT_CONFIG.longitude),
-    poll_frequency: Number(raw.poll_frequency ?? DEFAULT_CONFIG.poll_frequency),
-    // The preference is a boolean; anything but an explicit false means true.
-    GLADYS_PREFER_LOCAL: raw.GLADYS_PREFER_LOCAL !== false,
+    // Cognito user names are case-insensitive e-mails: trimmed only.
+    email: typeof source.email === 'string' ? source.email.trim() : '',
+    // Kept as typed: spaces may be part of a password.
+    password: typeof source.password === 'string' ? source.password : '',
+    refreshMs: Number(pick('refresh_minutes', REFRESH_MINUTES)) * 60_000,
+    weightUnit: pick('weight_unit', WEIGHT_UNITS),
+    snackDailyLimit: Number(pick('snack_daily_limit', SNACK_DAILY_LIMITS)),
+    language: LANGUAGES.includes(source.language) ? source.language : DEFAULT_CONFIG.language,
   };
 }
+
+/** Both credentials are filled in. */
+export const isConfigured = (config) => config.email !== '' && config.password !== '';

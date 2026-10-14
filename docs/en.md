@@ -1,61 +1,201 @@
-# Demo Devices Template
+# Litter-Robot
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+Follow your **Whisker** self-cleaning litter boxes and feeder from Gladys:
+the **Litter-Robot 3 Connect**, the **Litter-Robot 4** and the
+**Feeder-Robot**. See when the waste drawer must be emptied, when the cat
+last went (and what it weighs, on a Litter-Robot 4), be warned of a fault,
+and start a cleaning or dispense a portion from the dashboard or a scene.
 
-## What you get
+The integration uses the Whisker cloud, with the account of the Whisker app,
+like the app itself and like the Home Assistant integration. It is **not
+affiliated with Whisker**: Litter-Robot, Feeder-Robot and Whisker are
+trademarks of their owner.
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+> **Developed without the hardware: feedback welcome.** This integration was
+> built and tested against the real answers of the Whisker cloud published by
+> the pylitterbot library and by Home Assistant, not against a real robot. If
+> something does not work as described, please say so on the
+> [Gladys forum](https://community.gladysassistant.com) or in the
+> [issues](https://github.com/guim31/gladys-litter-robot/issues).
 
-## Configuration
+## What you need
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+- Gladys Assistant 5.1.0 or later, with access to the internet.
+- A Litter-Robot 3 **Connect** (the Wi-Fi model), a Litter-Robot 4 and/or a
+  Feeder-Robot, already set up in the **Whisker app**.
+- The e-mail and password of that Whisker account. An account that asks for
+  a second factor at sign-in is not supported: sign in once in the app first.
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+The Litter-Robot 5 and the Litter-Robot 3 without Wi-Fi are not supported.
 
-## Actions
+## Set up
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+1. Install the integration from the Gladys catalog.
+2. In **Configuration**, enter the **E-mail** and the **Password** of your
+   Whisker account, then save.
+3. Click **Test the connection**: the message under the button lists the
+   robots found on the account, with their state.
+4. Open the **Discover** tab: one device per robot. Click **Add**, pick a
+   room, save.
 
-## Scenes
+Options:
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+- **Refresh interval**: how often the robots are read from the Whisker cloud,
+  2, 5 (default), 10 or 15 minutes. A Litter-Robot 4 and a Feeder-Robot also
+  send their changes live; a Litter-Robot 3 is only read at this interval.
+- **Weight unit**: kilograms or pounds, for the cat weight in the widget.
+- **Feeder-Robot: portions per day**: the most portions Gladys may dispense
+  over 24 hours (4 by default, a minute apart at least). See _Actions_.
+- **Language of the feature names**: English, French (default), German or
+  Spanish. The names are given when a device is added; the robot states and
+  the messages of the scenes follow this language too.
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+The password is sent only to Whisker's sign-in service (Amazon Cognito). The
+integration keeps the session tokens it receives in its private storage, so
+that a restart does not sign in again with the password.
+
+## The devices
+
+### Litter-Robot 3 Connect
+
+| Feature              | What it is                                                          |
+| -------------------- | ------------------------------------------------------------------- |
+| Status               | The state in words: Ready, Cleaning in progress, Drawer full…       |
+| Waste drawer         | How full the drawer is, in %, from the cycles counted since emptied |
+| Cycles since emptied | Cleaning cycles since the drawer counter was last reset             |
+| Start cleaning       | Button: starts a cleaning cycle now                                 |
+| Reset drawer gauge   | Button: tells the robot the drawer was emptied (counter to zero)    |
+| Cleaning delay       | Minutes between the cat leaving and the cleaning: 3, 7 or 15        |
+| Night light          | Switch: the night light on or off                                   |
+| Panel lock           | Switch: locks the buttons of the robot                              |
+| Sleep mode           | Whether a sleep period is set (read only)                           |
+| Last visit           | Date and time of the last cat visit seen by the integration         |
+
+### Litter-Robot 4
+
+| Feature                 | What it is                                                    |
+| ----------------------- | ------------------------------------------------------------- |
+| Status                  | The state in words                                            |
+| Waste drawer            | How full the drawer is, in %, as the robot measures it        |
+| Litter level            | The litter level in the globe, in %                           |
+| Cat weight (g)          | The last weight the robot recorded, in grams (SmartWeight)    |
+| Cleaning cycles (total) | Every cleaning cycle since the robot was set up               |
+| Start cleaning          | Button: starts a cleaning cycle now                           |
+| Cleaning delay          | 3, 7, 15, 25 or 30 minutes                                    |
+| Night light mode        | Off, On or Automatic                                          |
+| Panel lock              | Switch: locks the buttons of the robot                        |
+| Sleep mode              | Whether a sleep period is set on at least one day (read only) |
+| Last visit              | Date and time of the last cat visit seen by the integration   |
+
+Gladys has no unit of mass: the weight is a number of grams, the unit is in
+its name. Its history and the scenes ("weight below 3500") work as usual.
+
+### Feeder-Robot
+
+| Feature               | What it is                                                  |
+| --------------------- | ----------------------------------------------------------- |
+| Status                | Ready, Motor jammed, Chute full, On battery, Offline        |
+| Food level            | The food left in the hopper, in % (by steps of the sensor)  |
+| Portions today        | Portions dispensed since midnight, meals and extra portions |
+| Last meal             | Date, name and portions of the last meal or extra portion   |
+| Dispense a portion    | Button: one portion now, within the daily limit             |
+| Automatic night light | Switch                                                      |
+| Panel lock            | Switch                                                      |
+
+A robot that the Whisker cloud reports offline shows an "unreachable" badge
+in Gladys.
 
 ## Dashboard
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+The **Litter-Robot** widget shows one litter box (the one chosen in its
+settings, else the first): the **Drawer** and **Litter** levels, the
+**Visits today**, its state, its **Last visit** and **Last weight**, and the
+buttons:
+
+- **Clean**: starts a cleaning cycle (Gladys asks for confirmation first);
+- **Drawer emptied** (Litter-Robot 3): sets the drawer counter back to zero.
+
+## Scenes
+
+### Triggers
+
+- **Cat visit**: a cat used the Litter-Robot. The integration sees it when the
+  robot starts its countdown before cleaning, or, if that moment fell between
+  two readings, when the cycle counter moves (a cleaning started by Gladys
+  does not count). Filter: the robot. Information for the scene: _Robot name_,
+  _Last weight recorded (kg)_ and _(lb)_ (Litter-Robot 4), _Visits today_.
+- **Waste drawer full**: the robot reports its drawer full, once per filling.
+  Information: _Robot name_, _Drawer level (%)_.
+- **Robot error**: a robot reports a fault or goes offline. Filters: the robot
+  and the kind of error (globe motor fault, pinch detected, cat sensor fault,
+  bonnet removed, robot offline, feeder motor jammed). Information: _Robot
+  name_, _Kind of error (code)_, _Error, in words_.
+
+### Actions
+
+- **Start a Litter-Robot cleaning**: starts a cycle now. Refused while the
+  robot detects a cat.
+- **Dispense a Feeder-Robot portion**: one portion now. To protect your cat
+  from a scene that loops, Gladys dispenses at most the number of portions set
+  in the configuration over 24 hours, and never two within a minute. Beyond
+  that, the action does nothing and says so: its result _Portion dispensed_ is
+  then "no", and _Portions left (24 h)_ tells how many remain. The meals
+  planned in the Whisker app are not counted.
+
+### Scene ideas
+
+- **Empty the drawer**: trigger _Waste drawer full_ → send a message "The
+  litter box drawer is full, it's your turn!".
+- **Watch the cat's health**: trigger _Cat visit_ → condition _Visits today_
+  greater than 8 → notify, an unusual number of visits can mean a urinary
+  problem. Or a scene on the _Cat weight (g)_ feature: below 3500 → notify.
+- **Clean while nobody is home**: trigger "everyone left" → action _Start a
+  Litter-Robot cleaning_.
+- **Fault alert**: trigger _Robot error_ with kind _Globe motor fault_ or
+  _Pinch detected_ → message with _Error, in words_.
+
+## Refresh, quotas and privacy
+
+- The robots are read every few minutes (the _Refresh interval_), plus one
+  reading a few seconds after a command; every robot family is listed again
+  once an hour to find a robot added to the account. A Litter-Robot 4 and a
+  Feeder-Robot are followed live through the subscription the Whisker app
+  uses.
+- Whisker publishes no quota nor terms for this API, which is the one of its
+  app; the integration stays at the pace of the Home Assistant integration
+  (5 minutes by default) and stops trying after a refused password or when
+  Whisker throttles the account (15 minutes).
+- Stored in the integration's private storage: the session tokens, a hash of
+  the e-mail, the visits of the day and the portions dispensed by Gladys.
+  Never the password; the logs never contain the password, the e-mail nor a
+  token.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- **"E-mail or password refused by Whisker"**: check them in the Whisker app,
+  then save the configuration again. After a refusal, the integration does not
+  try again by itself: save the configuration or click **Test the
+  connection**.
+- **"Your Whisker account asks for an extra step"**: sign in once in the
+  Whisker app (new password, verification code), then test the connection.
+- **"The Whisker cloud does not answer"**: an internet or Whisker outage; the
+  integration tries again at the next refresh.
+- **No device in the Discover tab**: click **Test the connection**; the
+  account must be the one where the robots are set up (not a shared account).
+- **A visit or a state comes late**: a Litter-Robot 3 is only read at the
+  refresh interval; lower it to 2 minutes.
+- More details: set `LOG_LEVEL=debug` on the integration and read its logs.
+
+## Limits
+
+- Developed without the hardware: the commands follow pylitterbot and the
+  Whisker app, but were not tried on a real robot.
+- Only the Litter-Robot 3 Connect, the Litter-Robot 4 and the Feeder-Robot;
+  no Litter-Robot 5, no pet profiles (the weight is the robot's last
+  reading, not a weight per cat: with several cats, it is the last one in).
+- The visits are the ones the integration saw since it was installed; it does
+  not read the history of the Whisker app.
+- The Litter-Robot 3 has no live updates here: it is read at the refresh
+  interval.
+- No sleep schedule nor meal schedule editing: use the Whisker app.
+- The cloud is required: without internet, nothing can be read or controlled.

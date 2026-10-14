@@ -16,8 +16,9 @@ its only runtime dependency. It started from the official JavaScript template.
 ```bash
 npm install
 npm test                                  # node --test, the built-in runner
-node --test test/devices.test.js          # one file
-node --test --test-name-pattern "plug"    # tests whose name matches
+node --test test/hub.test.js              # one file
+node --test --test-name-pattern "visit"   # tests whose name matches
+node scripts/probe.mjs                    # real Whisker cloud, read-only (needs internet)
 npm run lint                              # ESLint
 npm run format:check                      # Prettier, as the CI runs it
 npm run format                            # Prettier, fix in place
@@ -31,16 +32,25 @@ pushing.
 ## Architecture
 
 ```
-index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+index.js                          SDK wiring only (registerHandlers, shutdown)
+src/app.js                        every SDK handler, registered before connect(); returns the hub
+src/hub.js                        the robots: timer, live updates, states, triggers, commands, snack limit
+src/devices.js                    one Gladys device per robot: features, states, external ids
+src/texts.js                      every text sent to Gladys, in en/fr/de/es
+src/widgets.js                    the `litter_robot` widget (pure content builder + actions)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/store.js                      /data/litter-robot.json: tokens, visits, portions (mode 600)
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+src/whisker/srp.js                Cognito SRP math (BigInt), checked against pycognito vectors
+src/whisker/cognito.js            sign-in (USER_SRP_AUTH) and refresh (REFRESH_TOKEN_AUTH)
+src/whisker/client.js             the three APIs (LR3 REST, LR4 GraphQL, Feeder Hasura + commands)
+src/whisker/realtime.js           graphql-ws subscriptions (LR4 AppSync, Feeder Hasura)
+src/whisker/model.js              raw answers → robot snapshots (pylitterbot's rules)
+scripts/probe.mjs                 read-only probe of the real cloud (fake account: clean refusal)
+gladys-assistant-integration.json manifest: name, config_schema, actions, triggers, widget...
+docs/{en,fr,de,es}.md             user documentation, same sections, re-hosted by Gladys
+test/                             node --test, against the SDK's fake Gladys and a fake Whisker cloud
+test/fixtures/whisker/            real answers published by pylitterbot and Home Assistant
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +80,9 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in English, French, German and Spanish: action
+  messages, manifest texts, feature names, widget texts, and the four
+  `docs/*.md`, kept in sync (`test/i18n.test.js`).
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -204,6 +215,8 @@ code de ce dépôt. Compléter ce fichier quand un nouveau piège est découvert
   (schéma, `description` **100 caractères au plus par langue**, documentation de 300 caractères
   au moins, image Docker, cover de **150 Ko au plus**). Il demande Node ≥ 24 mais tourne sous
   Node 22 avec un avertissement.
+- Un champ `secret` du `config_schema` **ne doit pas avoir de `default`** (même `""`) : le
+  validateur du store le rejette (`not allowed for secret fields`).
 - L'indexeur lit le manifeste de la **dernière release**, pas celui de `main` : une correction du
   manifeste (catégorie, description…) n'atteint le store qu'avec une release.
 - L'indexeur rejette **en silence** : la raison n'apparaît que dans `rejected.json`, à côté de
@@ -233,3 +246,41 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Litter-Robot : l'API Whisker et les pièges découverts
+
+- **Pas d'API officielle** : c'est celle de l'application Whisker, telle que pylitterbot (MIT) la
+  documente par son code. Aucun quota publié ; rythme de Home Assistant (5 min) par défaut. Les clés
+  `x-api-key` (API LR3, commandes du Feeder) et les identifiants Cognito (pool `us-east-1`, client
+  sans secret) sont ceux, publics, de l'application ; gardés en base64 comme pylitterbot.
+- **Cognito n'accepte que SRP** (`USER_SRP_AUTH`) pour ce client : pas de `USER_PASSWORD_AUTH`.
+  `src/whisker/srp.js` refait pycognito en BigInt ; ne pas y toucher sans relancer
+  `test/srp.test.js` (vecteurs pycognito). L'horodatage du défi : jour **non** complété par un zéro
+  (« Sun Oct 4 08:05:09 UTC 2026 »), sinon signature refusée. Le `mid` du jeton d'identité est
+  l'identifiant utilisateur Whisker des requêtes LR3/LR4.
+- Joignable depuis une session de code : `cognito-idp.us-east-1.amazonaws.com` (un faux compte y
+  reçoit `UserNotFoundException`). **Injoignables** : `*.iothings.site` et les API Gateway de
+  Whisker. Tout le reste se teste sur les fixtures.
+- **Mot de passe refusé : jamais de nouvel essai sur minuteur** (Cognito finit par bloquer le
+  compte) ; seuls une nouvelle configuration ou « Tester la connexion » relancent.
+- **Litter-Robot 3** : `unitStatus` en codes (`RDY`, `CST`, `DF1`…), nombres **en chaînes**,
+  délai de nettoyage **en hexadécimal** (`"F"` = 15 min, commande `<WF`). Le niveau du tiroir se
+  déduit des compteurs (`cycleCount`/`cycleCapacity`), plafonné par `DF1`/`DF2`/`DFS` ; « tiroir
+  plein » peut venir plus tôt, de `isDFITriggered`. Pas d'abonnement temps réel ici (l'API Gateway
+  WebSocket de pylitterbot exige un en-tête `authorization` sur la connexion).
+- **Litter-Robot 4** : l'état se calcule (algorithme de pylitterbot : `isOnline`,
+  `unitPowerStatus`, `robotCycleState`, `robotStatus`, `displayCode`, `isDFIFull`). `catWeight` en
+  **livres**, 0 sans SmartWeight. Pas de remise à zéro du tiroir : il est **mesuré**. Une fixture
+  (Home Assistant) n'a pas de `unitId` : le numéro de série le remplace.
+- **Feeder-Robot** : pas de code d'état, des drapeaux (`online`, `motorJammed`, `chuteFull`…) ;
+  niveau de croquettes par paliers 0-9 ; repas des **dernières 24 h** seulement (filtre Hasura dans
+  la requête).
+- **Gladys n'a pas d'unité de masse** : le poids du chat est un `counter-sensor/integer` en
+  grammes, l'unité dans le nom. Les niveaux en % sont des `counter-sensor/integer` (plusieurs par
+  appareil, donc le nom s'affiche, pas le libellé générique du type).
+- **Passage du chat** : détecté à l'entrée en `CST` (compte à rebours avant nettoyage) ; manqué
+  entre deux lectures, le compteur de cycles qui avance le rattrape (sauf nettoyage lancé par
+  Gladys dans les 15 min). Hypothèse non vérifiée sur un vrai robot.
+- **Distribution de croquettes** : limite configurable par 24 h glissantes et une minute entre deux,
+  mémorisée dans `/data` (survit à un redémarrage). Le refus n'est pas une erreur de l'action de
+  scène : sortie `dispensed: false`.

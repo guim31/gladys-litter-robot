@@ -1,67 +1,217 @@
-# Template de démonstration
+# Litter-Robot
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+Suivez depuis Gladys vos litières autonettoyantes et votre distributeur
+**Whisker** : le **Litter-Robot 3 Connect**, le **Litter-Robot 4** et le
+**Feeder-Robot**. Sachez quand vider le tiroir à déchets, quand le chat est
+passé pour la dernière fois (et combien il pèse, sur un Litter-Robot 4),
+soyez prévenu d'une panne, et lancez un nettoyage ou distribuez une portion
+depuis le tableau de bord ou une scène.
 
-## Ce que vous obtenez
+L'intégration passe par le cloud Whisker, avec le compte de l'application
+Whisker, comme l'application elle-même et comme l'intégration Home Assistant.
+Elle est **sans lien avec Whisker** : Litter-Robot, Feeder-Robot et Whisker
+sont des marques de leur propriétaire.
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+> **Développée sans le matériel : vos retours sont bienvenus.** Cette
+> intégration a été construite et testée sur les vraies réponses du cloud
+> Whisker publiées par la bibliothèque pylitterbot et par Home Assistant, pas
+> sur un vrai robot. Si quelque chose ne marche pas comme décrit, dites-le sur
+> le [forum Gladys](https://community.gladysassistant.com) ou dans les
+> [issues](https://github.com/guim31/gladys-litter-robot/issues).
 
-## Configuration
+## Ce qu'il vous faut
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+- Gladys Assistant 5.1.0 ou plus récent, avec un accès à internet.
+- Un Litter-Robot 3 **Connect** (le modèle Wi-Fi), un Litter-Robot 4 et/ou un
+  Feeder-Robot, déjà configurés dans l'**application Whisker**.
+- L'e-mail et le mot de passe de ce compte Whisker. Un compte qui demande un
+  second facteur à la connexion n'est pas pris en charge : connectez-vous
+  d'abord une fois dans l'application.
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+Le Litter-Robot 5 et le Litter-Robot 3 sans Wi-Fi ne sont pas pris en charge.
 
-## Actions
+## Mise en place
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+1. Installez l'intégration depuis le catalogue de Gladys.
+2. Dans **Configuration**, saisissez l'**E-mail** et le **Mot de passe** de
+   votre compte Whisker, puis enregistrez.
+3. Cliquez sur **Tester la connexion** : le message sous le bouton liste les
+   robots trouvés sur le compte, avec leur état.
+4. Ouvrez l'onglet **Découverte** : un appareil par robot. Cliquez sur
+   **Ajouter**, choisissez une pièce, enregistrez.
 
-## Scènes
+Options :
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+- **Intervalle de rafraîchissement** : fréquence de lecture des robots dans le
+  cloud Whisker, 2, 5 (par défaut), 10 ou 15 minutes. Un Litter-Robot 4 et un
+  Feeder-Robot envoient aussi leurs changements en direct ; un Litter-Robot 3
+  n'est lu qu'à cet intervalle.
+- **Unité de poids** : kilogrammes ou livres, pour le poids du chat dans le
+  widget.
+- **Feeder-Robot : portions par jour** : le nombre maximal de portions que
+  Gladys peut distribuer sur 24 heures (4 par défaut, à une minute d'écart au
+  moins). Voir _Actions_.
+- **Langue des noms de fonctionnalités** : anglais, français (par défaut),
+  allemand ou espagnol. Les noms sont donnés à l'ajout d'un appareil ; les
+  états des robots et les messages des scènes suivent aussi cette langue.
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+Le mot de passe n'est envoyé qu'au service de connexion de Whisker (Amazon
+Cognito). L'intégration garde les jetons de session reçus dans son stockage
+privé, pour qu'un redémarrage ne se reconnecte pas avec le mot de passe.
+
+## Les appareils
+
+### Litter-Robot 3 Connect
+
+| Fonctionnalité            | Ce que c'est                                                             |
+| ------------------------- | ------------------------------------------------------------------------ |
+| État                      | L'état en clair : Prêt, Nettoyage en cours, Tiroir plein…                |
+| Tiroir à déchets          | Remplissage du tiroir, en %, d'après les cycles comptés depuis le vidage |
+| Cycles depuis le vidage   | Cycles de nettoyage depuis la dernière remise à zéro du compteur         |
+| Lancer un nettoyage       | Bouton : lance un cycle de nettoyage maintenant                          |
+| Remettre le tiroir à zéro | Bouton : indique au robot que le tiroir a été vidé (compteur à zéro)     |
+| Délai de nettoyage        | Minutes entre la sortie du chat et le nettoyage : 3, 7 ou 15             |
+| Veilleuse                 | Interrupteur : veilleuse allumée ou éteinte                              |
+| Verrouillage du panneau   | Interrupteur : verrouille les boutons du robot                           |
+| Mode nuit                 | Si une période de sommeil est réglée (lecture seule)                     |
+| Dernière visite           | Date et heure du dernier passage du chat vu par l'intégration            |
+
+### Litter-Robot 4
+
+| Fonctionnalité              | Ce que c'est                                                          |
+| --------------------------- | --------------------------------------------------------------------- |
+| État                        | L'état en clair                                                       |
+| Tiroir à déchets            | Remplissage du tiroir, en %, tel que le robot le mesure               |
+| Niveau de litière           | Le niveau de litière dans le globe, en %                              |
+| Poids du chat (g)           | Le dernier poids enregistré par le robot, en grammes (SmartWeight)    |
+| Cycles de nettoyage (total) | Tous les cycles de nettoyage depuis la mise en service                |
+| Lancer un nettoyage         | Bouton : lance un cycle de nettoyage maintenant                       |
+| Délai de nettoyage          | 3, 7, 15, 25 ou 30 minutes                                            |
+| Mode de la veilleuse        | Éteinte, Allumée ou Automatique                                       |
+| Verrouillage du panneau     | Interrupteur : verrouille les boutons du robot                        |
+| Mode nuit                   | Si une période de sommeil est réglée au moins un jour (lecture seule) |
+| Dernière visite             | Date et heure du dernier passage du chat vu par l'intégration         |
+
+Gladys n'a pas d'unité de masse : le poids est un nombre de grammes, l'unité
+est dans son nom. Son historique et les scènes (« poids inférieur à 3500 »)
+fonctionnent comme d'habitude.
+
+### Feeder-Robot
+
+| Fonctionnalité          | Ce que c'est                                                     |
+| ----------------------- | ---------------------------------------------------------------- |
+| État                    | Prêt, Moteur bloqué, Goulotte pleine, Sur batterie, Hors ligne   |
+| Niveau de croquettes    | Les croquettes restantes dans la réserve, en % (par paliers)     |
+| Portions aujourd'hui    | Portions distribuées depuis minuit, repas et portions en plus    |
+| Dernier repas           | Date, nom et portions du dernier repas ou de la dernière portion |
+| Distribuer une portion  | Bouton : une portion maintenant, dans la limite par jour         |
+| Veilleuse automatique   | Interrupteur                                                     |
+| Verrouillage du panneau | Interrupteur                                                     |
+
+Un robot que le cloud Whisker signale hors ligne porte un badge « injoignable »
+dans Gladys.
 
 ## Tableau de bord
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+Le widget **Litter-Robot** montre une litière (celle choisie dans ses
+réglages, sinon la première) : les niveaux du **Tiroir** et de la **Litière**,
+les **Visites du jour**, son état, sa **Dernière visite** et son **Dernier
+poids**, et les boutons :
+
+- **Nettoyer** : lance un cycle de nettoyage (Gladys demande d'abord
+  confirmation) ;
+- **Tiroir vidé** (Litter-Robot 3) : remet le compteur du tiroir à zéro.
+
+## Scènes
+
+### Déclencheurs
+
+- **Passage du chat** : un chat est passé dans le Litter-Robot. L'intégration
+  le voit quand le robot lance son compte à rebours avant nettoyage ou, si ce
+  moment est tombé entre deux lectures, quand le compteur de cycles avance (un
+  nettoyage lancé par Gladys ne compte pas). Filtre : le robot. Informations
+  pour la scène : _Nom du robot_, _Dernier poids enregistré (kg)_ et _(lb)_
+  (Litter-Robot 4), _Visites du jour_.
+- **Tiroir à déchets plein** : le robot signale son tiroir plein, une fois par
+  remplissage. Informations : _Nom du robot_, _Niveau du tiroir (%)_.
+- **Erreur du robot** : un robot signale un défaut ou passe hors ligne.
+  Filtres : le robot et le type d'erreur (défaut du moteur du globe,
+  pincement détecté, défaut du capteur de chat, capot retiré, robot hors
+  ligne, moteur du distributeur bloqué). Informations : _Nom du robot_, _Type
+  d'erreur (code)_, _Erreur, en clair_.
+
+### Actions
+
+- **Lancer un nettoyage du Litter-Robot** : lance un cycle maintenant. Refusé
+  tant que le robot détecte un chat.
+- **Distribuer une portion du Feeder-Robot** : une portion maintenant. Pour
+  protéger votre chat d'une scène qui boucle, Gladys distribue au plus le
+  nombre de portions réglé dans la configuration sur 24 heures, et jamais deux
+  en moins d'une minute. Au-delà, l'action ne fait rien et le dit : son
+  résultat _Portion distribuée_ vaut alors « non », et _Portions restantes
+  (24 h)_ indique combien il en reste. Les repas programmés dans l'application
+  Whisker ne comptent pas.
+
+### Idées de scènes
+
+- **Vider le tiroir** : déclencheur _Tiroir à déchets plein_ → envoyer un
+  message « Le tiroir de la litière est plein, à toi de jouer ! ».
+- **Surveiller la santé du chat** : déclencheur _Passage du chat_ → condition
+  _Visites du jour_ supérieur à 8 → prévenir, un nombre inhabituel de passages
+  peut signaler un problème urinaire. Ou une scène sur la fonctionnalité
+  _Poids du chat (g)_ : sous 3500 → prévenir.
+- **Nettoyer quand personne n'est là** : déclencheur « tout le monde est
+  parti » → action _Lancer un nettoyage du Litter-Robot_.
+- **Alerte panne** : déclencheur _Erreur du robot_ avec le type _Défaut du
+  moteur du globe_ ou _Pincement détecté_ → message avec _Erreur, en clair_.
+
+## Rafraîchissement, quotas et vie privée
+
+- Les robots sont lus toutes les quelques minutes (l'_Intervalle de
+  rafraîchissement_), plus une lecture quelques secondes après une commande ;
+  chaque famille de robots est relistée une fois par heure pour trouver un
+  robot ajouté au compte. Un Litter-Robot 4 et un Feeder-Robot sont suivis en
+  direct par l'abonnement qu'utilise l'application Whisker.
+- Whisker ne publie ni quota ni conditions pour cette API, qui est celle de
+  son application ; l'intégration garde le rythme de l'intégration Home
+  Assistant (5 minutes par défaut) et cesse d'essayer après un mot de passe
+  refusé ou quand Whisker limite le compte (15 minutes).
+- Gardé dans le stockage privé de l'intégration : les jetons de session, une
+  empreinte de l'e-mail, les visites du jour et les portions distribuées par
+  Gladys. Jamais le mot de passe ; les logs ne contiennent jamais le mot de
+  passe, l'e-mail ni un jeton.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- **« E-mail ou mot de passe refusé par Whisker »** : vérifiez-les dans
+  l'application Whisker, puis enregistrez à nouveau la configuration. Après un
+  refus, l'intégration ne réessaie pas d'elle-même : enregistrez la
+  configuration ou cliquez sur **Tester la connexion**.
+- **« Votre compte Whisker demande une étape de plus »** : connectez-vous une
+  fois dans l'application Whisker (nouveau mot de passe, code de
+  vérification), puis testez la connexion.
+- **« Le cloud Whisker ne répond pas »** : panne d'internet ou de Whisker ;
+  l'intégration réessaie au prochain rafraîchissement.
+- **Aucun appareil dans l'onglet Découverte** : cliquez sur **Tester la
+  connexion** ; le compte doit être celui où les robots sont configurés (pas
+  un compte partagé).
+- **Une visite ou un état arrive en retard** : un Litter-Robot 3 n'est lu
+  qu'à l'intervalle de rafraîchissement ; descendez-le à 2 minutes.
+- Plus de détails : réglez `LOG_LEVEL=debug` sur l'intégration et lisez ses
+  logs.
+
+## Limites
+
+- Développée sans le matériel : les commandes suivent pylitterbot et
+  l'application Whisker, mais n'ont pas été essayées sur un vrai robot.
+- Seulement le Litter-Robot 3 Connect, le Litter-Robot 4 et le Feeder-Robot ;
+  pas de Litter-Robot 5, pas de profils d'animaux (le poids est la dernière
+  mesure du robot, pas un poids par chat : avec plusieurs chats, c'est le
+  dernier passé).
+- Les visites sont celles que l'intégration a vues depuis son installation ;
+  elle ne lit pas l'historique de l'application Whisker.
+- Le Litter-Robot 3 n'a pas de mises à jour en direct ici : il est lu à
+  l'intervalle de rafraîchissement.
+- Pas de modification des plages de sommeil ni des repas programmés : utilisez
+  l'application Whisker.
+- Le cloud est indispensable : sans internet, rien ne peut être lu ni piloté.

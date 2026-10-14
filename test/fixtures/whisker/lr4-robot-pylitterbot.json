@@ -1,0 +1,102 @@
+{
+  "unitId": "LR4ID",
+  "name": "Litter-Robot 4",
+  "serial": "LR4C000001",
+  "userId": "000001",
+  "espFirmware": "1.1.50",
+  "picFirmwareVersion": "10512.2560.2.51",
+  "laserBoardFirmwareVersion": "255.0.255.255",
+  "isFirmwareUpdateTriggered": false,
+  "firmwareUpdateStatus": "SUCCEEDED",
+  "unitPowerType": "AC",
+  "catWeight": 7.93,
+  "displayCode": "DC_MODE_IDLE",
+  "unitTimezone": "America/Denver",
+  "cleanCycleWaitTime": 7,
+  "isKeypadLockout": false,
+  "nightLightMode": "AUTO",
+  "nightLightBrightness": 100,
+  "isPanelSleepMode": false,
+  "panelSleepTime": 0,
+  "panelWakeTime": 0,
+  "weekdaySleepModeEnabled": {
+    "Sunday": {
+      "sleepTime": 0,
+      "wakeTime": 510,
+      "isEnabled": true
+    },
+    "Monday": {
+      "sleepTime": 1410,
+      "wakeTime": 450,
+      "isEnabled": true
+    },
+    "Tuesday": {
+      "sleepTime": 1410,
+      "wakeTime": 450,
+      "isEnabled": true
+    },
+    "Wednesday": {
+      "sleepTime": 1410,
+      "wakeTime": 450,
+      "isEnabled": true
+    },
+    "Thursday": {
+      "sleepTime": 1410,
+      "wakeTime": 450,
+      "isEnabled": true
+    },
+    "Friday": {
+      "sleepTime": 1410,
+      "wakeTime": 450,
+      "isEnabled": true
+    },
+    "Saturday": {
+      "sleepTime": 1380,
+      "wakeTime": 510,
+      "isEnabled": false
+    }
+  },
+  "unitPowerStatus": "ON",
+  "sleepStatus": "WAKE",
+  "robotStatus": "ROBOT_IDLE",
+  "globeMotorFaultStatus": "FAULT_CLEAR",
+  "pinchStatus": "CLEAR",
+  "catDetect": "CAT_DETECT_SCALE_CLEAR",
+  "isBonnetRemoved": false,
+  "isNightLightLEDOn": true,
+  "odometerPowerCycles": 9,
+  "odometerCleanCycles": 93,
+  "panelBrightnessHigh": 100,
+  "panelBrightnessLow": 90,
+  "odometerEmptyCycles": 0,
+  "odometerFilterCycles": 0,
+  "isDFIResetPending": false,
+  "DFINumberOfCycles": 58,
+  "DFILevelPercent": 91,
+  "isDFIFull": false,
+  "DFIFullCounter": 0,
+  "DFITriggerCount": 33,
+  "litterLevel": 475,
+  "DFILevelMM": 115,
+  "isCatDetectPending": false,
+  "globeMotorRetractFaultStatus": "FAULT_CLEAR",
+  "robotCycleStatus": "CYCLE_IDLE",
+  "robotCycleState": "CYCLE_STATE_WAIT_ON",
+  "weightSensor": 0.9,
+  "isOnline": true,
+  "isOnboarded": true,
+  "lastSeen": "2022-07-20T00:13:00.000000Z",
+  "setupDateTime": "2022-07-16T21:40:00.000000Z",
+  "wifiModeStatus": "ROUTER_CONNECTED",
+  "isUSBPowerOn": true,
+  "USBFaultStatus": "CLEAR",
+  "isDFIPartialFull": false,
+  "isLaserDirty": false,
+  "surfaceType": "TILE",
+  "hopperStatus": null,
+  "scoopsSavedCount": 3769,
+  "isHopperRemoved": null,
+  "optimalLitterLevel": 450,
+  "litterLevelPercentage": 0.4,
+  "litterLevelState": "OPTIMAL"
+}
