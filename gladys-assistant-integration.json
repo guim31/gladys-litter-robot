@@ -1,177 +1,621 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Litter-Robot",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Whisker Litter-Robot 3 and 4, Feeder-Robot: drawer, litter, cat visits, cleaning.",
+    "fr": "Litter-Robot 3 et 4, Feeder-Robot de Whisker : tiroir, litière, passages du chat, nettoyage.",
+    "de": "Whisker Litter-Robot 3 und 4, Feeder-Robot: Schublade, Streu, Katzenbesuche, Reinigung.",
+    "es": "Litter-Robot 3 y 4, Feeder-Robot de Whisker: cajón, arena, visitas del gato, limpieza."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-litter-robot:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-litter-robot/main/cover.png",
+  "categories": ["appliances"],
+  "transports": ["cloud"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your Whisker account",
+        "fr": "Votre compte Whisker",
+        "de": "Dein Whisker-Konto",
+        "es": "Su cuenta Whisker"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "The account of the Whisker app, where your Litter-Robot 3 Connect, Litter-Robot 4 or Feeder-Robot is set up. The integration reads them through the Whisker cloud, like the app. Not affiliated with Whisker.",
+        "fr": "Le compte de l'application Whisker, où votre Litter-Robot 3 Connect, Litter-Robot 4 ou Feeder-Robot est configuré. L'intégration les lit par le cloud Whisker, comme l'application. Sans lien avec Whisker.",
+        "de": "Das Konto der Whisker-App, in dem dein Litter-Robot 3 Connect, Litter-Robot 4 oder Feeder-Robot eingerichtet ist. Die Integration liest sie über die Whisker-Cloud, wie die App. Nicht mit Whisker verbunden.",
+        "es": "La cuenta de la aplicación Whisker, donde está configurado su Litter-Robot 3 Connect, Litter-Robot 4 o Feeder-Robot. La integración los lee a través de la nube de Whisker, como la aplicación. Sin relación con Whisker."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://www.whisker.com",
+          "label": {
+            "en": "Whisker website",
+            "fr": "Site de Whisker",
+            "de": "Website von Whisker",
+            "es": "Sitio web de Whisker"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "email",
+      "type": "string",
+      "label": {
+        "en": "E-mail",
+        "fr": "E-mail",
+        "de": "E-Mail-Adresse",
+        "es": "Correo electrónico"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
+      "description": {
+        "en": "The e-mail you sign in to the Whisker app with.",
+        "fr": "L'e-mail avec lequel vous vous connectez à l'application Whisker.",
+        "de": "Die E-Mail-Adresse, mit der du dich in der Whisker-App anmeldest.",
+        "es": "El correo con el que inicia sesión en la aplicación Whisker."
+      },
+      "placeholder": {
+        "en": "e.g. name@example.com",
+        "fr": "ex. nom@exemple.fr",
+        "de": "z. B. name@beispiel.de",
+        "es": "p. ej. nombre@ejemplo.es"
+      },
       "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "default": ""
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe",
+        "de": "Passwort",
+        "es": "Contraseña"
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "description": {
+        "en": "The password of the Whisker app. Sent only to Whisker's sign-in service, never written to the logs.",
+        "fr": "Le mot de passe de l'application Whisker. Envoyé seulement au service de connexion de Whisker, jamais écrit dans les logs.",
+        "de": "Das Passwort der Whisker-App. Wird nur an den Anmeldedienst von Whisker gesendet, nie in die Protokolle geschrieben.",
+        "es": "La contraseña de la aplicación Whisker. Solo se envía al servicio de inicio de sesión de Whisker, nunca se escribe en los registros."
+      },
+      "required": true
     },
     {
-      "key": "unit",
+      "key": "options",
+      "type": "section",
+      "label": {
+        "en": "Options",
+        "fr": "Options",
+        "de": "Optionen",
+        "es": "Opciones"
+      },
+      "description": {
+        "en": "A Litter-Robot 4 and a Feeder-Robot send their changes live; every robot is also read again at the interval below.",
+        "fr": "Un Litter-Robot 4 et un Feeder-Robot envoient leurs changements en direct ; chaque robot est aussi relu à l'intervalle ci-dessous.",
+        "de": "Ein Litter-Robot 4 und ein Feeder-Robot senden ihre Änderungen live; jeder Roboter wird zusätzlich im Intervall unten neu gelesen.",
+        "es": "Un Litter-Robot 4 y un Feeder-Robot envían sus cambios en directo; cada robot también se vuelve a leer con el intervalo de abajo."
+      }
+    },
+    {
+      "key": "refresh_minutes",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "How often the robots are read from the Whisker cloud. The only source for a Litter-Robot 3.",
+        "fr": "Fréquence de lecture des robots dans le cloud Whisker. La seule source pour un Litter-Robot 3.",
+        "de": "Wie oft die Roboter aus der Whisker-Cloud gelesen werden. Die einzige Quelle für einen Litter-Robot 3.",
+        "es": "Con qué frecuencia se leen los robots en la nube de Whisker. La única fuente para un Litter-Robot 3."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "5",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "2",
+          "label": { "en": "2 minutes", "fr": "2 minutes", "de": "2 Minuten", "es": "2 minutos" }
+        },
+        {
+          "value": "5",
+          "label": { "en": "5 minutes", "fr": "5 minutes", "de": "5 Minuten", "es": "5 minutos" }
+        },
+        {
+          "value": "10",
+          "label": {
+            "en": "10 minutes",
+            "fr": "10 minutes",
+            "de": "10 Minuten",
+            "es": "10 minutos"
+          }
+        },
+        {
+          "value": "15",
+          "label": {
+            "en": "15 minutes",
+            "fr": "15 minutes",
+            "de": "15 Minuten",
+            "es": "15 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "weight_unit",
+      "type": "select",
+      "label": {
+        "en": "Weight unit",
+        "fr": "Unité de poids",
+        "de": "Gewichtseinheit",
+        "es": "Unidad de peso"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "For the cat weight in the widget (Litter-Robot 4). The device feature is in grams.",
+        "fr": "Pour le poids du chat dans le widget (Litter-Robot 4). La fonctionnalité de l'appareil est en grammes.",
+        "de": "Für das Gewicht der Katze im Widget (Litter-Robot 4). Die Gerätefunktion ist in Gramm.",
+        "es": "Para el peso del gato en el widget (Litter-Robot 4). La función del dispositivo está en gramos."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "kg",
+      "options": [
+        {
+          "value": "kg",
+          "label": { "en": "Kilograms", "fr": "Kilogrammes", "de": "Kilogramm", "es": "Kilogramos" }
+        },
+        {
+          "value": "lb",
+          "label": { "en": "Pounds", "fr": "Livres", "de": "Pfund", "es": "Libras" }
+        }
+      ]
+    },
+    {
+      "key": "snack_daily_limit",
+      "type": "select",
+      "label": {
+        "en": "Feeder-Robot: portions per day",
+        "fr": "Feeder-Robot : portions par jour",
+        "de": "Feeder-Robot: Portionen pro Tag",
+        "es": "Feeder-Robot: raciones por día"
+      },
+      "description": {
+        "en": "At most this many portions dispensed by Gladys over 24 hours, a minute apart, so a scene that loops cannot empty the hopper. The meals of the Whisker app are not counted.",
+        "fr": "Au plus ce nombre de portions distribuées par Gladys sur 24 heures, à une minute d'intervalle, pour qu'une scène qui boucle ne vide pas la réserve. Les repas de l'application Whisker ne comptent pas.",
+        "de": "Höchstens so viele von Gladys ausgegebene Portionen in 24 Stunden, im Abstand von einer Minute, damit eine Szene in einer Schleife den Vorrat nicht leert. Die Mahlzeiten der Whisker-App zählen nicht.",
+        "es": "Como máximo este número de raciones dispensadas por Gladys en 24 horas, con un minuto de separación, para que una escena en bucle no vacíe la tolva. Las comidas de la aplicación Whisker no cuentan."
+      },
+      "required": false,
+      "default": "4",
+      "options": [
+        { "value": "1", "label": { "en": "1", "fr": "1", "de": "1", "es": "1" } },
+        { "value": "2", "label": { "en": "2", "fr": "2", "de": "2", "es": "2" } },
+        { "value": "3", "label": { "en": "3", "fr": "3", "de": "3", "es": "3" } },
+        { "value": "4", "label": { "en": "4", "fr": "4", "de": "4", "es": "4" } },
+        { "value": "6", "label": { "en": "6", "fr": "6", "de": "6", "es": "6" } },
+        { "value": "8", "label": { "en": "8", "fr": "8", "de": "8", "es": "8" } }
+      ]
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the feature names",
+        "fr": "Langue des noms de fonctionnalités",
+        "de": "Sprache der Funktionsnamen",
+        "es": "Idioma de los nombres de funciones"
+      },
+      "description": {
+        "en": "Names given to the features when a device is added, and language of the robot states and of the scene messages.",
+        "fr": "Noms donnés aux fonctionnalités à l'ajout d'un appareil, et langue des états des robots et des messages des scènes.",
+        "de": "Namen der Funktionen beim Hinzufügen eines Geräts, und Sprache der Roboterzustände und der Szenenmeldungen.",
+        "es": "Nombres dados a las funciones al añadir un dispositivo, e idioma de los estados de los robots y de los mensajes de las escenas."
+      },
+      "required": false,
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": { "en": "English", "fr": "Anglais", "de": "Englisch", "es": "Inglés" }
+        },
+        {
+          "value": "fr",
+          "label": { "en": "French", "fr": "Français", "de": "Französisch", "es": "Francés" }
+        },
+        {
+          "value": "de",
+          "label": { "en": "German", "fr": "Allemand", "de": "Deutsch", "es": "Alemán" }
+        },
+        {
+          "value": "es",
+          "label": { "en": "Spanish", "fr": "Espagnol", "de": "Spanisch", "es": "Español" }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Signs in to the Whisker account now and lists the robots found, with their state.",
+        "fr": "Se connecte au compte Whisker maintenant et liste les robots trouvés, avec leur état.",
+        "de": "Meldet sich jetzt beim Whisker-Konto an und listet die gefundenen Roboter mit ihrem Zustand auf.",
+        "es": "Inicia sesión ahora en la cuenta Whisker y enumera los robots encontrados, con su estado."
+      },
+      "timeout_seconds": 60
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "cat_visited",
+      "label": {
+        "en": "Cat visit",
+        "fr": "Passage du chat",
+        "de": "Katzenbesuch",
+        "es": "Visita del gato"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A cat used the Litter-Robot (it starts its countdown before cleaning), with the visits of the day.",
+        "fr": "Un chat est passé dans le Litter-Robot (il lance son compte à rebours avant nettoyage), avec les visites du jour.",
+        "de": "Eine Katze hat den Litter-Robot benutzt (er startet seinen Countdown vor der Reinigung), mit den Besuchen des Tages.",
+        "es": "Un gato ha usado el Litter-Robot (inicia su cuenta atrás antes de limpiar), con las visitas del día."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Litter-Robot (empty: any)",
+            "fr": "Litter-Robot (vide : n'importe lequel)",
+            "de": "Litter-Robot (leer: beliebig)",
+            "es": "Litter-Robot (vacío: cualquiera)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "robot",
+          "type": "string",
+          "label": {
+            "en": "Robot name",
+            "fr": "Nom du robot",
+            "de": "Name des Roboters",
+            "es": "Nombre del robot"
+          }
         },
         {
-          "key": "target",
+          "key": "weight_kg",
+          "type": "number",
+          "label": {
+            "en": "Last weight recorded (kg)",
+            "fr": "Dernier poids enregistré (kg)",
+            "de": "Zuletzt gemessenes Gewicht (kg)",
+            "es": "Último peso registrado (kg)"
+          }
+        },
+        {
+          "key": "weight_lb",
+          "type": "number",
+          "label": {
+            "en": "Last weight recorded (lb)",
+            "fr": "Dernier poids enregistré (lb)",
+            "de": "Zuletzt gemessenes Gewicht (lb)",
+            "es": "Último peso registrado (lb)"
+          }
+        },
+        {
+          "key": "visits_today",
+          "type": "number",
+          "label": {
+            "en": "Visits today",
+            "fr": "Visites du jour",
+            "de": "Besuche heute",
+            "es": "Visitas de hoy"
+          }
+        }
+      ]
+    },
+    {
+      "key": "drawer_full",
+      "label": {
+        "en": "Waste drawer full",
+        "fr": "Tiroir à déchets plein",
+        "de": "Abfallschublade voll",
+        "es": "Cajón de residuos lleno"
+      },
+      "description": {
+        "en": "The Litter-Robot reports its waste drawer full: time to empty it. Once per filling.",
+        "fr": "Le Litter-Robot signale son tiroir à déchets plein : il faut le vider. Une fois par remplissage.",
+        "de": "Der Litter-Robot meldet seine Abfallschublade voll: Zeit, sie zu leeren. Einmal pro Füllung.",
+        "es": "El Litter-Robot indica que su cajón de residuos está lleno: hay que vaciarlo. Una vez por llenado."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Litter-Robot (empty: any)",
+            "fr": "Litter-Robot (vide : n'importe lequel)",
+            "de": "Litter-Robot (leer: beliebig)",
+            "es": "Litter-Robot (vacío: cualquiera)"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "robot",
+          "type": "string",
+          "label": {
+            "en": "Robot name",
+            "fr": "Nom du robot",
+            "de": "Name des Roboters",
+            "es": "Nombre del robot"
+          }
+        },
+        {
+          "key": "drawer_level",
+          "type": "number",
+          "label": {
+            "en": "Drawer level (%)",
+            "fr": "Niveau du tiroir (%)",
+            "de": "Füllstand der Schublade (%)",
+            "es": "Nivel del cajón (%)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "robot_error",
+      "label": {
+        "en": "Robot error",
+        "fr": "Erreur du robot",
+        "de": "Roboterfehler",
+        "es": "Error del robot"
+      },
+      "description": {
+        "en": "A robot reports a fault (motor, pinch, cat sensor, bonnet, jammed feeder) or goes offline.",
+        "fr": "Un robot signale un défaut (moteur, pincement, capteur de chat, capot, distributeur bloqué) ou passe hors ligne.",
+        "de": "Ein Roboter meldet einen Fehler (Motor, Einklemmen, Katzensensor, Haube, blockierter Futterautomat) oder geht offline.",
+        "es": "Un robot indica un fallo (motor, pinzamiento, sensor de gato, cubierta, comedero atascado) o se queda sin conexión."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Robot (empty: any)",
+            "fr": "Robot (vide : n'importe lequel)",
+            "de": "Roboter (leer: beliebig)",
+            "es": "Robot (vacío: cualquiera)"
+          }
+        },
+        {
+          "key": "kind",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Kind of error (empty: any)",
+            "fr": "Type d'erreur (vide : tous)",
+            "de": "Art des Fehlers (leer: alle)",
+            "es": "Tipo de error (vacío: todos)"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "motor",
+              "label": {
+                "en": "Globe motor fault",
+                "fr": "Défaut du moteur du globe",
+                "de": "Fehler des Trommelmotors",
+                "es": "Fallo del motor del globo"
+              }
+            },
+            {
+              "value": "pinch",
+              "label": {
+                "en": "Pinch detected",
+                "fr": "Pincement détecté",
+                "de": "Einklemmen erkannt",
+                "es": "Pinzamiento detectado"
+              }
+            },
+            {
+              "value": "cat_sensor",
+              "label": {
+                "en": "Cat sensor fault",
+                "fr": "Défaut du capteur de chat",
+                "de": "Fehler des Katzensensors",
+                "es": "Fallo del sensor de gato"
+              }
+            },
+            {
+              "value": "bonnet",
+              "label": {
+                "en": "Bonnet removed",
+                "fr": "Capot retiré",
+                "de": "Haube abgenommen",
+                "es": "Cubierta retirada"
+              }
+            },
+            {
+              "value": "offline",
+              "label": {
+                "en": "Robot offline",
+                "fr": "Robot hors ligne",
+                "de": "Roboter offline",
+                "es": "Robot sin conexión"
+              }
+            },
+            {
+              "value": "feeder_jam",
+              "label": {
+                "en": "Feeder motor jammed",
+                "fr": "Moteur du distributeur bloqué",
+                "de": "Motor des Futterautomaten blockiert",
+                "es": "Motor del comedero atascado"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "robot",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Robot name",
+            "fr": "Nom du robot",
+            "de": "Name des Roboters",
+            "es": "Nombre del robot"
+          }
+        },
+        {
+          "key": "kind",
+          "type": "string",
+          "label": {
+            "en": "Kind of error (code)",
+            "fr": "Type d'erreur (code)",
+            "de": "Art des Fehlers (Code)",
+            "es": "Tipo de error (código)"
+          }
+        },
+        {
+          "key": "message",
+          "type": "string",
+          "label": {
+            "en": "Error, in words",
+            "fr": "Erreur, en clair",
+            "de": "Fehler, im Klartext",
+            "es": "Error, en palabras"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "start_cleaning",
+      "label": {
+        "en": "Start a Litter-Robot cleaning",
+        "fr": "Lancer un nettoyage du Litter-Robot",
+        "de": "Litter-Robot-Reinigung starten",
+        "es": "Iniciar una limpieza del Litter-Robot"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Starts a cleaning cycle now. Refused while the robot detects a cat.",
+        "fr": "Lance un cycle de nettoyage maintenant. Refusé tant que le robot détecte un chat.",
+        "de": "Startet jetzt einen Reinigungszyklus. Abgelehnt, solange der Roboter eine Katze erkennt.",
+        "es": "Inicia ahora un ciclo de limpieza. Se rechaza mientras el robot detecta un gato."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
+          "label": {
+            "en": "Litter-Robot",
+            "fr": "Litter-Robot",
+            "de": "Litter-Robot",
+            "es": "Litter-Robot"
+          },
+          "required": true
+        }
+      ]
+    },
+    {
+      "key": "dispense_snack",
+      "label": {
+        "en": "Dispense a Feeder-Robot portion",
+        "fr": "Distribuer une portion du Feeder-Robot",
+        "de": "Feeder-Robot-Portion ausgeben",
+        "es": "Dispensar una ración del Feeder-Robot"
+      },
+      "description": {
+        "en": "One portion now, within the daily limit of the configuration (a minute apart).",
+        "fr": "Une portion maintenant, dans la limite par jour de la configuration (une minute d'écart).",
+        "de": "Jetzt eine Portion, innerhalb der Tagesgrenze der Konfiguration (eine Minute Abstand).",
+        "es": "Una ración ahora, dentro del límite diario de la configuración (un minuto de separación)."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Feeder-Robot",
+            "fr": "Feeder-Robot",
+            "de": "Feeder-Robot",
+            "es": "Feeder-Robot"
+          },
           "required": true
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "dispensed",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "Portion dispensed",
+            "fr": "Portion distribuée",
+            "de": "Portion ausgegeben",
+            "es": "Ración dispensada"
+          }
+        },
+        {
+          "key": "remaining_today",
+          "type": "number",
+          "label": {
+            "en": "Portions left (24 h)",
+            "fr": "Portions restantes (24 h)",
+            "de": "Verbleibende Portionen (24 h)",
+            "es": "Raciones restantes (24 h)"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "litter_robot",
+      "label": {
+        "en": "Litter-Robot",
+        "fr": "Litter-Robot",
+        "de": "Litter-Robot",
+        "es": "Litter-Robot"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "Drawer and litter levels, the cat's last visit, and a Clean button.",
+        "fr": "Niveaux du tiroir et de la litière, dernière visite du chat, bouton Nettoyer.",
+        "de": "Füllstand von Schublade und Streu, letzter Katzenbesuch, Taste Reinigen.",
+        "es": "Niveles del cajón y de la arena, última visita del gato y botón Limpiar."
+      },
+      "icon": "trash-2",
+      "action_timeout_seconds": 30,
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Litter-Robot (empty: the first one)",
+            "fr": "Litter-Robot (vide : le premier)",
+            "de": "Litter-Robot (leer: der erste)",
+            "es": "Litter-Robot (vacío: el primero)"
+          }
+        }
+      ]
     }
   ]
 }

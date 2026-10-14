@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-litter-robot",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Whisker Litter-Robot 3 Connect, Litter-Robot 4 and Feeder-Robot integration for Gladys Assistant (not affiliated with Whisker).",
   "type": "module",
   "main": "index.js",
   "scripts": {
